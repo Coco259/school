@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩管理 - 学生成绩管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/index">学生成绩管理系统</a>
+            <button id="logoutBtn" class="btn btn-light">退出登录</button>
+        </div>
+    </nav>
+    <div class="container mt-4" id="scorePage">
+        <h3>成绩管理</h3>
+        <form id="addScoreForm" class="mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <input type="number" name="student_id" class="form-control" placeholder="学号" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="course_id" class="form-control" placeholder="课程ID" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="score" class="form-control" placeholder="成绩" required>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-success">添加成绩</button>
+                </div>
+            </div>
+        </form>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>记录ID</th>
+                    <th>学号</th>
+                    <th>课程ID</th>
+                    <th>成绩</th>
+                </tr>
+            </thead>
+            <tbody id="scoreTableBody"></tbody>
+        </table>
+    </div>
+        <!-- 编辑成绩模态框 -->
+        <div class="modal fade" id="editScoreModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">编辑成绩</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="editScoreForm">
+                            <input type="hidden" id="editScoreId">
+                            <div class="mb-3">
+                                <input type="number" id="editStudentId" class="form-control" placeholder="学号" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="number" id="editCourseId" class="form-control" placeholder="课程ID" required>
+                            </div>
+                            <div class="mb-3">
+                                <input type="number" id="editScore" class="form-control" placeholder="成绩" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="saveEditScore()">保存</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script src="/static/js/score.js"></script>
+</body>
+</html>
