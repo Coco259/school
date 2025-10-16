@@ -1,0 +1,134 @@
+Subject: [PATCH] webscore: student login fixes, add password support, and enhanced smoke tests
+
+简短说明:
+- 使添加学生时可选写入 password 字段。
+- 修正学生登录逻辑：接受 numeric student_id，若数据库中 password 为 NULL/空则允许无密码登录；登录时在 session 中存储整数 student_id。
+- 修复并增强 smoke_test.py：支持完整 CRUD 流程、通过查询获取 numeric id、清理时使用 numeric id 删除资源；备份原始简单测试为 smoke_test.py.bak。
+- 添加 README.md，包含导入 setup_db.sql、安装依赖、启动服务和运行 smoke_test 的步骤。
+
+受影响文件:
+- app.py
+- smoke_test.py
+- smoke_test.py.bak
+- README.md
+
+提交详情（关键变更片段，便于 review）:
+
+1) app.py - add_student: 在添加学生时接收可选的 password 并插入到数据库（如提供）
+
+--- before (片段) ---
+    class_name = data.get('class')
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        f"INSERT INTO {STUDENTS_TABLE} ({STUDENT_NAME_COL}, {STUDENT_GENDER_COL}, {STUDENT_AGE_COL}, {STUDENT_CLASS_COL}) VALUES (%s, %s, %s, %s)",
+        (name, gender, age, class_name)
+    )
+    db.commit()
+    db.close()
+    return jsonify({"success": True})
+
+--- after (片段) ---
+    class_name = data.get('class')
+    password = data.get('password')
+
+    db = get_db()
+    cursor = db.cursor()
+    # 如果提供了 password，则插入 password 字段（兼容 setup_db.sql）
+    if password is not None:
+        cursor.execute(
+            f"INSERT INTO {STUDENTS_TABLE} ({STUDENT_NAME_COL}, {STUDENT_GENDER_COL}, {STUDENT_AGE_COL}, {STUDENT_CLASS_COL}, password) VALUES (%s, %s, %s, %s, %s)",
+            (name, gender, age, class_name, password)
+        )
+    else:
+        cursor.execute(
+            f"INSERT INTO {STUDENTS_TABLE} ({STUDENT_NAME_COL}, {STUDENT_GENDER_COL}, {STUDENT_AGE_COL}, {STUDENT_CLASS_COL}) VALUES (%s, %s, %s, %s)",
+            (name, gender, age, class_name)
+        )
+    db.commit()
+    db.close()
+    return jsonify({"success": True})
+
+2) app.py - student_login: 强化登录检查与 session 写入
+
+--- before (片段) ---
+    student_id = data.get('student_id')
+    password = data.get('password')
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(f"SELECT * FROM {STUDENTS_TABLE} WHERE {STUDENT_ID_COL} = %s", (student_id,))
+    student = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if not student:
+        return jsonify({"success": False, "message": "学号不存在"})
+
+    # 如果 students 表包含 password 字段，则验证密码；否则只要学号存在即允许登录
+    if 'password' in student:
+        if password and password == student.get('password'):
+            session['is_student_login'] = True
+            session['student_id'] = student_id
+            session['student_name'] = student.get('name')
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "message": "密码错误"})
+    else:
+        session['is_student_login'] = True
+        session['student_id'] = student_id
+        session['student_name'] = student.get('name')
+        return jsonify({"success": True})
+
+--- after (片段) ---
+    student_id = data.get('student_id')
+    password = data.get('password')
+    try:
+        # ensure integer id when possible
+        student_id = int(student_id)
+    except Exception:
+        pass
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(f"SELECT * FROM {STUDENTS_TABLE} WHERE {STUDENT_ID_COL} = %s", (student_id,))
+    student = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if not student:
+        return jsonify({"success": False, "message": "学号不存在"})
+
+    # 如果数据库中存在 password 字段，按以下规则验证：
+    # - 如果存储的 password 为 NULL/空字符串，则允许不输密码直接登录
+    # - 否则需要提供匹配的 password
+    stored_pwd = student.get('password') if isinstance(student, dict) else None
+    if stored_pwd is None or stored_pwd == '':
+        session['is_student_login'] = True
+        session['student_id'] = int(student.get(STUDENT_ID_COL)) if student.get(STUDENT_ID_COL) is not None else student_id
+        session['student_name'] = student.get('name')
+        return jsonify({"success": True})
+    else:
+        if password and password == stored_pwd:
+            session['is_student_login'] = True
+            session['student_id'] = int(student.get(STUDENT_ID_COL)) if student.get(STUDENT_ID_COL) is not None else student_id
+            session['student_name'] = student.get('name')
+            return jsonify({"success": True})
+        else:
+            return jsonify({"success": False, "message": "密码错误"})
+
+3) smoke_test.py: 替换为增强版（完整 CRUD 流程、会话 cookie 管理、通过查询获取 numeric ids、清理阶段使用 numeric id）
+
+（已备份原简单脚本到 smoke_test.py.bak）
+
+4) README.md: 新增快速上手说明（导入 SQL、安装依赖、启动 Flask、运行 smoke_test）
+
+如何使用此 patch 文件:
+- 文件为人类可读的变更说明，若你使用 Git，可以根据上面的片段把修改提交到分支；或者我可以为你直接生成 `git` 的实际 patch（unified diff），如果你需要我现在就生成可用的 git-format patch，请回复“生成 git patch”。
+
+备注:
+- 本次改动为了快速使项目本地可运行与自动化测试通过，未做密码哈希（生产环境强烈建议使用哈希并通过环境变量传 DB 密码）。
+- 若你想要我把更改直接 commit 到仓库（创建分支并执行 commit），我也可以帮你，但这会修改工作区的 git 状态，需要你确认。
+
+生成时间: 2025-10-16 18:10:00 +0800
