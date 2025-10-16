@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>学生门户 - 学生成绩管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">学生成绩管理系统</a>
+            <button id="logoutBtn" class="btn btn-light">退出登录</button>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h3>我的成绩</h3>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>课程ID</th>
+                    <th>成绩</th>
+                </tr>
+            </thead>
+            <tbody id="myScoresBody"></tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/student.js"></script>
+</body>
+</html>
