@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理 - 学生成绩管理系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/index">学生成绩管理系统</a>
+            <button id="logoutBtn" class="btn btn-light">退出登录</button>
+        </div>
+    </nav>
+    <div class="container mt-4" id="studentPage">
+        <h3>学生管理</h3>
+        <form id="addStudentForm" class="mb-4">
+            <div class="row g-3">
+        <div class="col-md-3">
+          <input type="text" name="name" class="form-control" placeholder="姓名" required data-rules="required" data-label="姓名">
+                </div>
+                <div class="col-md-2">
+          <select name="gender" class="form-select" required data-rules="required" data-label="性别">
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+          <input type="number" name="age" class="form-control" placeholder="年龄" required data-rules="required|age" data-label="年龄">
+                </div>
+                <div class="col-md-3">
+          <input type="text" name="class" class="form-control" placeholder="班级" required data-rules="required" data-label="班级">
+                </div>
+                <div class="col-md-2">
+          <button type="submit" class="btn btn-success" data-loading-text="提交中">添加学生</button>
+                </div>
+            </div>
+        </form>
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>学号</th>
+                    <th>姓名</th>
+                    <th>性别</th>
+                    <th>年龄</th>
+                    <th>班级</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+        </table>
+        <!-- 编辑学生模态框 -->
+<div class="modal fade" id="editStudentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">编辑学生</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editStudentForm">
+          <input type="hidden" id="editStudentId"> <!-- 存储学生ID -->
+          <div class="mb-3">
+            <input type="text" id="editName" class="form-control" placeholder="姓名" required data-rules="required" data-label="姓名">
+          </div>
+          <div class="mb-3">
+            <select id="editGender" class="form-select" required data-rules="required" data-label="性别">
+              <option value="男">男</option>
+              <option value="女">女</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <input type="number" id="editAge" class="form-control" placeholder="年龄" required data-rules="required|age" data-label="年龄">
+          </div>
+          <div class="mb-3">
+            <input type="text" id="editClass" class="form-control" placeholder="班级" required data-rules="required" data-label="班级">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" onclick="saveEditStudent()" data-loading-text="保存中">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

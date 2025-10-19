@@ -1,0 +1,19 @@
+{
+  "created": [
+    "templates/course.html",
+    "templates/index.html",
+    "templates/login.html",
+    "templates/score.html",
+    "templates/student.html",
+    "templates/student_login.html",
+    "templates/student_portal.html",
+    "templates/js/main.js",
+    "static/css/style.css",
+    "static/js/course.js",
+    "static/js/main.js",
+    "static/js/score.js",
+    "static/js/student.js"
+  ],
+  "updated": [],
+  "errors": []
+}
