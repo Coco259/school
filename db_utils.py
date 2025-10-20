@@ -12,11 +12,14 @@ def get_conn():
     )
 
 def execute(sql, params=None):
-    """执行SQL（增删改）"""
+    """执行SQL（增删改），优先使用参数化以避免注入风险。"""
     conn = get_conn()
     cursor = conn.cursor()
     try:
-        cursor.execute(sql, params)
+        if params is None:
+            cursor.execute(sql)
+        else:
+            cursor.execute(sql, params)
         conn.commit()  # 提交事务
         return cursor.rowcount  # 返回受影响的行数
     except Exception as e:
@@ -28,11 +31,14 @@ def execute(sql, params=None):
         conn.close()
 
 def query(sql, params=None):
-    """执行查询SQL（查）"""
+    """执行查询SQL（查），统一走参数化查询。"""
     conn = get_conn()
     cursor = conn.cursor()
     try:
-        cursor.execute(sql, params)
+        if params is None:
+            cursor.execute(sql)
+        else:
+            cursor.execute(sql, params)
         return cursor.fetchall()  # 返回查询结果（元组列表）
     except Exception as e:
         print(f"查询失败：{e}")
