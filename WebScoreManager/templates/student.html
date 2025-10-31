@@ -50,6 +50,16 @@
             </thead>
             <tbody id="studentTableBody"></tbody>
         </table>
+    <div class="card mt-4">
+      <div class="card-header d-flex flex-wrap align-items-center gap-2">
+        <span class="fw-semibold">班级成绩分布直方图</span>
+        <select id="classSelect" class="form-select form-select-sm" style="max-width: 240px;"></select>
+      </div>
+      <div class="card-body">
+        <div id="classScoreChart" style="height: 360px;"></div>
+        <p id="classChartEmpty" class="text-muted text-center mt-3 d-none">暂无成绩数据可展示</p>
+      </div>
+    </div>
         <!-- 编辑学生模态框 -->
 <div class="modal fade" id="editStudentModal" tabindex="-1">
   <div class="modal-dialog">
@@ -87,6 +97,7 @@
 </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
     <script src="/static/js/common.js"></script>
     <script src="/static/js/main.js"></script>
 </body>

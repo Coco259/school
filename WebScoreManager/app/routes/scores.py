@@ -4,6 +4,7 @@ from .. import app
 from ..config import (
     COURSES_TABLE,
     COURSE_ID_COL,
+    COURSE_NAME_COL,
     SCORES_TABLE,
     SCORE_COURSE_ID_COL,
     SCORE_ID_COL,
@@ -11,10 +12,11 @@ from ..config import (
     SCORE_STUDENT_ID_COL,
     STUDENTS_TABLE,
     STUDENT_ID_COL,
+    STUDENT_NAME_COL,
 )
 from ..db import get_db
 from ..schemas import ScoreCreateModel, ScoreUpdateModel, validate_json
-from ..security import require_csrf
+from ..security import require_admin_session, require_csrf
 
 
 @app.route('/api/scores/<int:score_id>', methods=['GET'])
@@ -37,6 +39,52 @@ def list_scores():
     cursor.close()
     db.close()
     return jsonify(scores)
+
+
+@app.route('/api/scores/by-student/<int:student_id>', methods=['GET'])
+def list_scores_by_student(student_id):
+    err = require_admin_session()
+    if err:
+        return err
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        f"SELECT sc.{SCORE_ID_COL} AS score_id, sc.{SCORE_SCORE_COL} AS score, "
+        f"sc.{SCORE_COURSE_ID_COL} AS course_id, c.{COURSE_NAME_COL} AS course_name "
+        f"FROM {SCORES_TABLE} sc "
+        f"JOIN {COURSES_TABLE} c ON sc.{SCORE_COURSE_ID_COL} = c.{COURSE_ID_COL} "
+        f"WHERE sc.{SCORE_STUDENT_ID_COL} = %s "
+        f"ORDER BY sc.{SCORE_ID_COL}",
+        (student_id,),
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return jsonify(rows)
+
+
+@app.route('/api/scores/by-course/<int:course_id>', methods=['GET'])
+def list_scores_by_course(course_id):
+    err = require_admin_session()
+    if err:
+        return err
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(
+        f"SELECT sc.{SCORE_ID_COL} AS score_id, sc.{SCORE_SCORE_COL} AS score, "
+        f"sc.{SCORE_STUDENT_ID_COL} AS student_id, s.{STUDENT_NAME_COL} AS student_name "
+        f"FROM {SCORES_TABLE} sc "
+        f"JOIN {STUDENTS_TABLE} s ON sc.{SCORE_STUDENT_ID_COL} = s.{STUDENT_ID_COL} "
+        f"WHERE sc.{SCORE_COURSE_ID_COL} = %s "
+        f"ORDER BY sc.{SCORE_ID_COL}",
+        (course_id,),
+    )
+    rows = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return jsonify(rows)
 
 
 @app.route('/api/scores/<int:score_id>', methods=['DELETE'])

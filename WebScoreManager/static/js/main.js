@@ -1,3 +1,5 @@
+let classChart;
+
 document.addEventListener('DOMContentLoaded', () => {
   const { apiFetch, showToast, setLoading, attachValidation, validateForm } = window.AppUtils || {};
 
@@ -49,6 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const studentPage = document.getElementById('studentPage');
   if (studentPage) {
     initStudentsPage();
+    initClassDistribution();
   }
 });
 
@@ -127,6 +130,123 @@ function initStudentsPage() {
       setLoading(submitBtn, false);
     }
   });
+}
+
+async function initClassDistribution() {
+  const { apiFetch, showToast } = window.AppUtils || {};
+  const container = document.getElementById('classScoreChart');
+  const selectEl = document.getElementById('classSelect');
+  const emptyHint = document.getElementById('classChartEmpty');
+  if (!container || !selectEl || typeof echarts === 'undefined' || !apiFetch) {
+    return;
+  }
+
+  classChart = echarts.init(container);
+  window.addEventListener('resize', () => {
+    if (classChart) {
+      classChart.resize();
+    }
+  });
+
+  try {
+    const res = await apiFetch('/api/statistics/classes');
+    if (!res.ok) throw new Error('加载班级失败');
+    const classes = await res.json();
+    selectEl.innerHTML = '';
+    if (!classes.length) {
+      toggleClassChartEmpty(true, emptyHint);
+      return;
+    }
+    classes.forEach(className => {
+      const option = document.createElement('option');
+      option.value = className;
+      option.textContent = className;
+      selectEl.appendChild(option);
+    });
+    selectEl.addEventListener('change', () => {
+      updateClassDistribution(selectEl.value, emptyHint);
+    });
+    await updateClassDistribution(selectEl.value, emptyHint);
+  } catch (error) {
+    console.error('加载班级列表失败', error);
+    showToast && showToast('加载班级列表失败', 'danger');
+    toggleClassChartEmpty(true, emptyHint);
+  }
+}
+
+async function updateClassDistribution(className, emptyHint) {
+  const { apiFetch, showToast } = window.AppUtils || {};
+  if (!className || !classChart || !apiFetch) {
+    toggleClassChartEmpty(true, emptyHint);
+    return;
+  }
+  try {
+    const res = await apiFetch(`/api/statistics/class/${encodeURIComponent(className)}`);
+    if (!res.ok) throw new Error('获取班级成绩失败');
+    const data = await res.json();
+    renderClassDistribution(data?.distribution || [], className, emptyHint);
+  } catch (error) {
+    console.error('加载班级成绩分布失败', error);
+    showToast && showToast('加载班级成绩分布失败', 'danger');
+    toggleClassChartEmpty(true, emptyHint);
+  }
+}
+
+function renderClassDistribution(distribution, className, emptyHint) {
+  if (!classChart) return;
+  const xAxisData = Array.isArray(distribution) ? distribution.map(item => item.label) : [];
+  const seriesData = Array.isArray(distribution) ? distribution.map(item => item.count || 0) : [];
+  const hasData = seriesData.some(count => count > 0);
+  toggleClassChartEmpty(!hasData, emptyHint);
+  const option = {
+    title: {
+      text: hasData ? `${className} 班级成绩区间人数` : `${className} 暂无成绩数据`,
+      left: 'center',
+      textStyle: {
+        fontSize: 14,
+      },
+    },
+    tooltip: {
+      trigger: 'axis',
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '6%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      data: xAxisData,
+      axisTick: { alignWithLabel: true },
+    },
+    yAxis: {
+      type: 'value',
+      name: '人数',
+      minInterval: 1,
+    },
+    series: [
+      {
+        type: 'bar',
+        data: seriesData,
+        itemStyle: {
+          color: '#4c8bf5',
+        },
+        barWidth: '50%',
+      },
+    ],
+  };
+  classChart.setOption(option, true);
+  classChart.resize();
+}
+
+function toggleClassChartEmpty(show, emptyHint) {
+  if (!emptyHint) return;
+  if (show) {
+    emptyHint.classList.remove('d-none');
+  } else {
+    emptyHint.classList.add('d-none');
+  }
 }
 
 async function editStudent(studentId) {

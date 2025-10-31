@@ -49,6 +49,42 @@ def test_get_scores(student_session):
     assert isinstance(scores, list)
     assert any(float(s['score']) == 95.5 for s in scores)
 
+
+def test_scores_by_student_endpoint(admin_session, student_session):
+    if not hasattr(test_create_score, 'score_id'):
+        if not hasattr(test_create_course, 'course_id'):
+            test_create_course(admin_session)
+        cid = test_create_course.course_id
+        sid = getattr(student_session, '_student_id', None)
+        assert sid is not None
+        payload = {'student_id': sid, 'course_id': cid, 'score': 95.5}
+        resp = admin_session.post(f'{BASE}/api/scores', json=payload)
+        assert resp.status_code == 200
+        listing = admin_session.get(f'{BASE}/api/scores').json()
+        for sc in listing:
+            if sc.get('student_id') == sid and sc.get('course_id') == cid:
+                test_create_score.score_id = sc.get('score_id')
+                break
+        assert hasattr(test_create_score, 'score_id')
+    sid = getattr(student_session, '_student_id', None)
+    assert sid is not None
+    resp = admin_session.get(f'{BASE}/api/scores/by-student/{sid}')
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert any(abs(float(item['score']) - 95.5) < 1e-6 for item in data)
+
+
+def test_scores_by_course_endpoint(admin_session):
+    if not hasattr(test_create_course, 'course_id'):
+        test_create_course(admin_session)
+    cid = test_create_course.course_id
+    resp = admin_session.get(f'{BASE}/api/scores/by-course/{cid}')
+    assert resp.status_code == 200
+    data = resp.json()
+    assert isinstance(data, list)
+    assert any(abs(float(item['score']) - 95.5) < 1e-6 for item in data)
+
 def test_cleanup(admin_session):
     # 删除成绩、学生、课程
     if hasattr(test_create_score, 'score_id'):
