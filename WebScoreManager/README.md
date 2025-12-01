@@ -1,3 +1,14 @@
+## React 前端迁移
+
+为了逐步替换旧的 Flask 模板，我们在 `webscore-ui` 目录下引入了一个 Vite + React 项目：
+
+- 依赖：`react`, `react-router-dom`, `axios`, `react-bootstrap`, `bootstrap`。
+- API 交互：`src/services/httpClient.js` 统一封装 `/api` 请求，自动携带 `X-CSRFToken`。
+- 结构：`pages/` 负责业务页面，`components/layout/` 包含布局，`context/` 管理全局状态。
+- 启动方式：在 `WebScoreManager` 目录执行 `npm install` + `npm run dev`，服务会代理 `/api` 到 Flask。
+
+后续计划：将 `students`, `courses`, `scores`, `statistics` 等页面逐步替换为 React 组件，目前提供了基础路由、面板、表单和状态管理示例。
+
 # WebScoreManager — 烟雾测试与设置
 
 此文件夹包含一个基于 Flask 的小型学生/课程/成绩管理器。`smoke_test.py` 脚本执行端到端的冒烟测试（管理员登录、创建课程、创建学生、创建成绩、学生登录、获取成绩、清理）。
