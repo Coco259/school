@@ -1,0 +1,8 @@
+.sidebar {
+  width: 220px;
+  background: #fff;
+}
+
+.content {
+  min-height: calc(100vh - var(--navbar-height));
+}

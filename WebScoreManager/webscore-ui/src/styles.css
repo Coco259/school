@@ -1,0 +1,43 @@
+:root {
+  --navbar-height: 56px;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  background: #f6f7fb;
+  min-height: 100vh;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+}
+
+.content {
+  flex: 1;
+  padding: 1.5rem;
+}
+
+.sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: #fff;
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}

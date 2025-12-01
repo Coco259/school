@@ -1,0 +1,13 @@
+Flask>=2.0
+pymysql>=1.0
+
+# Added for password hashing, validation, CSRF, and optional DB/ORM
+passlib[bcrypt]>=1.7
+flask-wtf>=1.0
+pydantic>=1.10
+SQLAlchemy>=1.4
+Flask-SQLAlchemy>=3.0
+python-dotenv>=1.0
+flask-cors>=3.0
+pytest
+requests
